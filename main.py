@@ -1,6 +1,7 @@
 import pyautogui
 import keyboard
 import time
+import mouse
 
 # Safety: move mouse to top-left corner to abort
 pyautogui.FAILSAFE = True  # keep enabled for safety
@@ -10,8 +11,8 @@ screen_width, screen_height = pyautogui.size()
 
 # Percent-based positions
 # first_x, first_y = int(screen_width * 0.15), int(screen_height * 0.59) #giovanne
-# first_x, first_y = int(screen_width * 0.15), int(screen_height * 0.69) #reyna
-first_x, first_y = int(screen_width * 0.05), int(screen_height * 0.69) #phoenix
+first_x, first_y = int(screen_width * 0.15), int(screen_height * 0.69) #reyna
+#first_x, first_y = int(screen_width * 0.05), int(screen_height * 0.69) #phoenix
 
 
 second_x, second_y = int(screen_width * 0.50), int(screen_height * 0.70)
@@ -30,13 +31,25 @@ def toggle():
 
 keyboard.add_hotkey("F8", toggle)
 
-while True:
-    if clicking:
-        pyautogui.moveTo(first_x, first_y, duration=0)  # instant movement
-        time.sleep(0.15)  # wait 
+at_first = True
 
-        # Second click
-        pyautogui.moveTo(second_x, second_y, duration=0)  # instant movement
-        time.sleep(0.15)  # wait
-    else:
-        time.sleep(0.05)
+# Event handler: triggered when any mouse event occurs
+def on_event(event):
+    global at_first
+    if not clicking:
+        return
+    # Only handle button events
+    if isinstance(event, mouse.ButtonEvent):
+        # Detect left button release
+        if event.event_type == 'up' and event.button == 'left':
+            if at_first:
+                pyautogui.moveTo(second_x, second_y, duration=0)
+            else:
+                pyautogui.moveTo(first_x, first_y, duration=0)
+            at_first = not at_first
+
+# Hook all mouse events
+mouse.hook(on_event)
+
+# Keep the script running
+keyboard.wait()  # waits indefinitely
